@@ -178,36 +178,36 @@ class _TwitterPageState extends State<TwitterScreen> {
                 text,
                 style: TextStyle(color: Colors.deepOrangeAccent, fontSize: 17),
               ),
-              Container(
-                  child: InAppWebView(
-                    onWebViewCreated: onWebCreate,
-                    initialOptions: InAppWebViewGroupOptions(
-                      android: AndroidInAppWebViewOptions(
-                        useWideViewPort: false,
-                      ),
-                      ios: IOSInAppWebViewOptions(
-                        enableViewportScale: false,
-                      ),
-                      crossPlatform: InAppWebViewOptions(
-                          debuggingEnabled: true,
-                          javaScriptEnabled: true,
-                          javaScriptCanOpenWindowsAutomatically: true),
+              Flexible(
+                fit: FlexFit.tight,
+                child: InAppWebView(
+                  onWebViewCreated: onWebCreate,
+                  initialOptions: InAppWebViewGroupOptions(
+                    android: AndroidInAppWebViewOptions(
+                      useWideViewPort: false,
                     ),
-                    onLoadStart:
-                        (InAppWebViewController controller, String url) {
-                      if (url != "about:blank") {
-                        inAppWebViewController.stopLoading();
-                        _launchURL(url);
-                        Timer(Duration(milliseconds: 300), () {
-                          inAppWebViewController.loadData(
-                              data: data,
-                              mimeType: "text/html",
-                              encoding: "UTF-8");
-                        });
-                      }
-                    },
+                    ios: IOSInAppWebViewOptions(
+                      enableViewportScale: false,
+                    ),
+                    crossPlatform: InAppWebViewOptions(
+                        debuggingEnabled: true,
+                        javaScriptEnabled: true,
+                        javaScriptCanOpenWindowsAutomatically: true),
                   ),
-                  height: 400),
+                  onLoadStart: (InAppWebViewController controller, String url) {
+                    if (url != "about:blank") {
+                      inAppWebViewController.stopLoading();
+                      _launchURL(url);
+                      Timer(Duration(milliseconds: 300), () {
+                        inAppWebViewController.loadData(
+                            data: data,
+                            mimeType: "text/html",
+                            encoding: "UTF-8");
+                      });
+                    }
+                  },
+                ),
+              ),
               Container(
                   child: InAppWebView(
                     onWebViewCreated: onWebCreate1,
