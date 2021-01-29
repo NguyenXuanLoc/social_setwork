@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_native_web/flutter_native_web.dart';
+import 'package:social_setwork/screen/article/article_interactor.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class TwitterScreen extends StatefulWidget {
@@ -161,6 +162,12 @@ class _TwitterPageState extends State<TwitterScreen> {
     } else {
       throw 'Could not launch $url';
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    ArticleInteractor.getArticle(context);
   }
 
   @override
