@@ -11,6 +11,8 @@ class ArticleInteractor {
     ArticleModel model = ArticleModel.fromJson(jsonResult);
     print("MODEL: "+model.title);
     print("PHOTO: "+model.photos.length.toString());
+    print("PHOTO: "+model.category.toString());
+    print("TAGS: "+model.tags.length.toString());
 //    print("TAG: "+model.);
 //    print("DATA: " + .toString());
   }
