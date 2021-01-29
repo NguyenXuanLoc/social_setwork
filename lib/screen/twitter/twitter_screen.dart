@@ -214,7 +214,7 @@ class _TwitterPageState extends State<TwitterScreen> {
                       }
                     },
                   ),
-                  height: 400),
+                  height: 500),
               Container(
                   child: InAppWebView(
                     onWebViewCreated: onWebCreate1,
