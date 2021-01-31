@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:social_setwork/model/categrory_model.dart';
 import 'package:social_setwork/model/photo_model.dart';
 import 'package:social_setwork/model/related_model.dart';
 import 'package:social_setwork/model/tag_model.dart';
@@ -6,7 +9,7 @@ class ArticleModel {
   final String copyright;
   final int id;
 
-//  final String category;
+  final String category;
   final String title;
   final String sourceText;
   final String dateText;
@@ -26,7 +29,7 @@ class ArticleModel {
   ArticleModel(
       this.copyright,
       this.id,
-      this.title,
+      this.title,this.category,
       this.sourceText,
       this.dateText,
       this.shortDescription,
@@ -43,7 +46,7 @@ class ArticleModel {
     return ArticleModel(
         ob['copyright'],
         ob['id'],
-//        ob['category'],
+        ob['category'].toString(),
         ob['title'],
         ob['source_text'],
         ob['date_text'],
