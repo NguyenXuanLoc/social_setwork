@@ -167,7 +167,7 @@ class _TwitterPageState extends State<TwitterScreen> {
   @override
   void initState() {
     super.initState();
-    ArticleInteractor.getArticle(context);
+    // ArticleInteractor.getArticle(context);
   }
 
   @override

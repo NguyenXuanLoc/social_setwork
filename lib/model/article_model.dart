@@ -9,7 +9,7 @@ class ArticleModel {
   final String copyright;
   final int id;
 
-  final String category;
+  final CategoryModel category;
   final String title;
   final String sourceText;
   final String dateText;
@@ -19,17 +19,18 @@ class ArticleModel {
 
   final List<PhotoModel> photos;
   final String contentText;
+
 //  final List<Object> videos;
   final List<TagModel> tags;
   final List<RelatedModel> related;
   final bool skipVod;
   final String seeAlso;
 
-
   ArticleModel(
       this.copyright,
       this.id,
-      this.title,this.category,
+      this.title,
+      this.category,
       this.sourceText,
       this.dateText,
       this.shortDescription,
@@ -46,8 +47,8 @@ class ArticleModel {
     return ArticleModel(
         ob['copyright'],
         ob['id'],
-        ob['category'].toString(),
         ob['title'],
+        CategoryModel.fromJson(ob['category']),
         ob['source_text'],
         ob['date_text'],
         ob['short_description'],
