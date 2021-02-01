@@ -14,7 +14,7 @@ class ItemTag extends StatefulWidget {
 class _ItemState extends State<ItemTag> {
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Container(color: Colors.white,
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: [
@@ -32,6 +32,7 @@ class _ItemState extends State<ItemTag> {
           ),
           SizedBox(
             width: 10,
+
           ),
           Flexible(
               child: Text(

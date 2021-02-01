@@ -242,6 +242,7 @@ class _ArticlePageState extends State<ArticlePage> {
                       ),
                     ),
                     Container(
+                      padding: EdgeInsets.only(top: 10),
                         child: InAppWebView(
                           onWebViewCreated: onWebSocial,
                           initialOptions: InAppWebViewGroupOptions(
@@ -270,7 +271,7 @@ class _ArticlePageState extends State<ArticlePage> {
                             }
                           },
                         ),
-                        height: 300),
+                        height: 400),
                     Container(
                       padding: EdgeInsets.only(left: 10, right: 10),
                       child: GridView.count(
