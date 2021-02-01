@@ -15,7 +15,6 @@ class MainActivity : FlutterActivity(), MethodChannel.MethodCallHandler {
     override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
         super.onCreate(savedInstanceState, persistentState)
         MethodChannel(getBinaryMessenger(), CHANNEL).setMethodCallHandler(this)
-
     }
 
     fun getBinaryMessenger(): BinaryMessenger? {

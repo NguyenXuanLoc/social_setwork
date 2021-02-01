@@ -15,7 +15,7 @@ class TwitterScreen extends StatefulWidget {
 }
 
 class _TwitterPageState extends State<TwitterScreen> {
-  String data = "<blockquote class=" +
+ static String data = "<blockquote class=" +
       "\"" +
       "twitter-tweet" +
       "\"" +
