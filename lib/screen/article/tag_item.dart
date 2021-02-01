@@ -21,7 +21,7 @@ class _ItemState extends State<ItemTag> {
           ClipRRect(
             borderRadius: BorderRadius.all(Radius.circular(100)),
             child: Container(
-              padding: EdgeInsets.all(10),
+              padding: EdgeInsets.all(6),
               child: Icon(
                 Icons.add,
                 color: Colors.white,

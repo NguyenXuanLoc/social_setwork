@@ -11,7 +11,8 @@ class ArticleItem extends StatefulWidget {
   _ArticleItemState createState() => _ArticleItemState();
 }
 
-class _ArticleItemState extends State<ArticleItem> {
+class _ArticleItemState extends State<ArticleItem>
+    with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -24,6 +25,7 @@ class _ArticleItemState extends State<ArticleItem> {
               height: 90,
             ),
             height: 90,
+            width: 120,
           ),
           SizedBox(
             width: 10,
@@ -52,4 +54,6 @@ class _ArticleItemState extends State<ArticleItem> {
       height: 120,
     );
   }
+  @override
+  bool get wantKeepAlive => true;
 }

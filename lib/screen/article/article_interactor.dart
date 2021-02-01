@@ -4,16 +4,55 @@ import 'package:flutter/cupertino.dart';
 import 'package:social_setwork/model/article_model.dart';
 
 class ArticleInteractor {
-
   Future<ArticleModel> getArticle(BuildContext context) async {
     final data =
         await DefaultAssetBundle.of(context).loadString('assets/article.json');
     var jsonResult = json.decode(data.toString());
     return ArticleModel.fromJson(jsonResult);
   }
- String getContentSosialNetWork(){
+
+  String getContentSosialNetWork() {
     return data;
   }
+
+  String commentFb = "<!DOCTYPE html><html><head>    <meta name=" +
+      "\"" +
+      "viewport" +
+      "\"" +
+      " content=" +
+      "\"" +
+      "width=device-width, initial-scale=1.0" +
+      "\"" +
+      ">    <meta property=" +
+      "\"" +
+      "og:locale" +
+      "\"" +
+      " content=" +
+      "\"" +
+      "pl_PL" +
+      "\"" +
+      " /></head><body><div id=" +
+      "\"" +
+      "fb-root" +
+      "\"" +
+      "></div><script>(function(d, s, id) {  var js, fjs = d.getElementsByTagName(s)[0];  if (d.getElementById(id)) return;  js = d.createElement(s); js.id = id;  js.src = " +
+      "\"" +
+      "//connect.facebook.net/pl_PL/sdk.js#xfbml=1&version=v2.6" +
+      "\"" +
+      ";  fjs.parentNode.insertBefore(js, fjs);}(document, 'script', 'facebook-jssdk'));</script><div class=" +
+      "\"" +
+      "fb-comments" +
+      "\"" +
+      " data-href=" +
+      "\"" +
+      "https://www.polsatnews.pl/wiadomosc/2021-02-01/polsat-news-nieoficjalnie-bedzie-nowy-harmonogram-szczepien-konferencja-szefa-kprm-od-g-1345/" +
+      "\"" +
+      " data-numposts=" +
+      "\"" +
+      "5" +
+      "\"" +
+      "></div></body></html>";
+
   String data = "<blockquote class=" +
       "\"" +
       "twitter-tweet" +

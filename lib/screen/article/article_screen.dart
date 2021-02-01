@@ -10,6 +10,8 @@ import 'package:social_setwork/screen/article/article_interactor.dart';
 import 'package:social_setwork/screen/article/article_item.dart';
 import 'package:social_setwork/screen/article/tag_item.dart';
 import 'package:social_setwork/screen/twitter/twitter_screen.dart';
+import 'package:social_setwork/screen/webpage/webview_screen.dart';
+import 'package:social_setwork/utils/navigation_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ArticlePage extends StatefulWidget {
@@ -23,6 +25,7 @@ class _ArticlePageState extends State<ArticlePage> {
   ArticleInteractor intaractor;
   InAppWebViewController webContentDController;
   InAppWebViewController webSocialDController;
+  var controller = PageController(initialPage: 0);
 
   void onWebLoadContent(inAppWebViewController) {
     this.webContentDController = inAppWebViewController;
@@ -57,35 +60,35 @@ class _ArticlePageState extends State<ArticlePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
         leading: Icon(
-          Icons.art_track,
-          size: 40,
+          Icons.list,
+          size: 30,
           color: Colors.black,
         ),
-        backgroundColor: Colors.white,
         actions: [
           Expanded(
               child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Icon(
-                Icons.search,
-                color: Colors.white,
-              ),
+              SizedBox(),
               Image.asset('assets/logo_splashscreen.png'),
               Text(
                 "22'C",
-                style: TextStyle(color: Colors.black26, fontSize: 20),
+                style: TextStyle(color: Colors.black26, fontSize: 18),
               ),
               Image.asset(
                 'assets/fontsize_white_pressed.png',
+                color: Colors.black45,
               ),
               Icon(
                 Icons.camera_alt,
+                size: 30,
                 color: Colors.black,
               ),
               Icon(
                 Icons.search,
+                size: 30,
                 color: Colors.black38,
               ),
             ],
@@ -104,12 +107,12 @@ class _ArticlePageState extends State<ArticlePage> {
                   Icon(
                     Icons.arrow_back,
                     color: Colors.white,
-                    size: 30,
+                    size: 25,
                   ),
                   Icon(
                     Icons.share,
                     color: Colors.white,
-                    size: 30,
+                    size: 25,
                   )
                 ],
               ),
@@ -127,11 +130,59 @@ class _ArticlePageState extends State<ArticlePage> {
                     child: ListView(
                   shrinkWrap: true,
                   children: [
-                    Image.network(
-                      model.photos[0].url.toString(),
-                      fit: BoxFit.fill,
+                    Container(
                       height: 200,
-                      width: MediaQuery.of(context).size.width,
+                      child: Stack(
+                        children: [
+                          Image.network(
+                            model.photos[0].url.toString(),
+                            fit: BoxFit.fill,
+                            height: 200,
+                            width: MediaQuery.of(context).size.width,
+                            errorBuilder: (context, error, stackhere) {
+                              if (error != null && context != null) {
+                                return Image.asset(
+                                  "assets/logo_splashscreen.png",
+                                  height: 200,
+                                  width: MediaQuery.of(context).size.width,
+                                );
+                              }
+                              return null;
+                            },
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Expanded(
+                                  child: Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 1,
+                                  valueColor: new AlwaysStoppedAnimation<Color>(
+                                      Colors.deepOrangeAccent),
+                                ),
+                              ));
+                            },
+                          ),
+                          Positioned(
+                            child: Column(
+                              children: [
+                                Spacer(),
+                                Container(
+                                  padding:
+                                      EdgeInsets.only(left: 10, bottom: 10),
+                                  child: Container(
+                                    padding: EdgeInsets.only(left: 5, right: 5),
+                                    color: Colors.deepOrangeAccent,
+                                    child: Text(
+                                      model.category.name,
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 16),
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                     SizedBox(
                       height: 15,
@@ -158,7 +209,7 @@ class _ArticlePageState extends State<ArticlePage> {
                       padding: EdgeInsets.only(top: 10, left: 10, right: 10),
                     ),
                     Container(
-                      height: 900,
+                      height: 2500,
                       child: InAppWebView(
                         onWebViewCreated: onWebLoadContent,
                         initialOptions: InAppWebViewGroupOptions(
@@ -174,7 +225,15 @@ class _ArticlePageState extends State<ArticlePage> {
                               javaScriptCanOpenWindowsAutomatically: true),
                         ),
                         onLoadStart:
-                            (InAppWebViewController controller, String url) {},
+                            (InAppWebViewController controller, String url) {
+                          if (url != "about:blank") {
+                            NavigationUtils.movePage(context, WebPage(url));
+                            webContentDController.stopLoading();
+                            Timer(Duration(milliseconds: 300), () {
+                              onWebLoadContent(webContentDController);
+                            });
+                          }
+                        },
                         onLoadStop:
                             (InAppWebViewController controller, String url) {
                           webSocialDController.evaluateJavascript(
@@ -236,11 +295,14 @@ class _ArticlePageState extends State<ArticlePage> {
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ),
+                    SizedBox(
+                      height: 10,
+                    ),
                     Container(
                       padding: EdgeInsets.only(left: 10, right: 10),
-                      height: 6,
+                      height: 5,
                       child: Container(
-                        color: Colors.grey,
+                        color: Colors.grey[200],
                       ),
                     ),
                     Container(
@@ -264,11 +326,14 @@ class _ArticlePageState extends State<ArticlePage> {
                       ),
                       padding: EdgeInsets.only(left: 10, right: 10),
                     ),
+                    SizedBox(
+                      height: 10,
+                    ),
                     Container(
                       padding: EdgeInsets.only(left: 10, right: 10),
-                      height: 6,
+                      height: 5,
                       child: Container(
-                        color: Colors.grey,
+                        color: Colors.grey[200],
                       ),
                     ),
                   ],
@@ -305,7 +370,13 @@ class _ArticlePageState extends State<ArticlePage> {
     } catch (ex) {
       print("EXP: " + ex.toString());
     }
-//    String html = buf.toString().replace("%link%", fbCommentUrl);
-//    wvFacebook.loadDataWithBaseURL(fbCommentUrl, html, "text/html", "UTF-8", null);
+  }
+
+  Widget pageView() {
+    return PageView(
+      controller: controller,
+      scrollDirection: Axis.horizontal,
+      children: [ArticlePage(), TwitterScreen()],
+    );
   }
 }
