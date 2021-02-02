@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:event_bus/event_bus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:social_setwork/screen/article/article_screen.dart';
+import 'package:social_setwork/utils/common_utils.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebPage extends StatefulWidget {
@@ -55,7 +58,7 @@ class _WebPageState extends State<WebPage> {
                     InkWell(
                       onTap: () {},
                       child: Icon(
-                        Icons.receipt_long,
+                        Icons.share,
                         color: Colors.white,
                         size: 25,
                       ),
@@ -71,28 +74,32 @@ class _WebPageState extends State<WebPage> {
               ),*/
               Builder(
                 builder: (_) {
-                  if (isLoading) return Expanded(
-                      child: Center(child: CircularProgressIndicator(),));
+                  if (isLoading)
+                    return Expanded(
+                        child: Center(
+                      child: CircularProgressIndicator(),
+                    ));
                   return Expanded(
                       child: Container(
-                        child: InAppWebView(
-                          initialUrl: widget.url,
-                          initialOptions: InAppWebViewGroupOptions(
-                            crossPlatform:
+                    child: InAppWebView(
+                      initialUrl: widget.url,
+                      initialOptions: InAppWebViewGroupOptions(
+                        crossPlatform:
                             InAppWebViewOptions(debuggingEnabled: true),
-                          ),
-                          onWebViewCreated: (
-                              InAppWebViewController controller) {},
-                          onLoadStart:
-                              (InAppWebViewController controller, String url) {
-                            setState(() {});
-                          },
-                          onLoadStop: (InAppWebViewController controller,
-                              String url) async {
-                            setState(() {});
-                          },
-                        ),
-                      ));
+                      ),
+                      onLoadStart:
+                          (InAppWebViewController controller, String url) {
+                        print("TAG: URL: " + url);
+                        if (url.contains(
+                            "https://m.facebook.com/plugins/close_popup.php")) {
+                          CommonUtils.eventBus.fire("reload");
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      onLoadStop: (InAppWebViewController controller,
+                          String url) async {},
+                    ),
+                  ));
                 },
               )
             ],

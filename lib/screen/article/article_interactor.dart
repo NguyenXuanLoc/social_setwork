@@ -15,7 +15,13 @@ class ArticleInteractor {
     return data;
   }
 
-  String commentFb = "<!DOCTYPE html><html><head>    <meta name=" +
+  String getCommentFb(String url) {
+    return _commentFb.replaceAll("%link%", url);
+  }
+
+
+
+   String _commentFb = "<!DOCTYPE html><html><head>    <meta name=" +
       "\"" +
       "viewport" +
       "\"" +
@@ -45,7 +51,7 @@ class ArticleInteractor {
       "\"" +
       " data-href=" +
       "\"" +
-      "https://www.polsatnews.pl/wiadomosc/2021-02-01/polsat-news-nieoficjalnie-bedzie-nowy-harmonogram-szczepien-konferencja-szefa-kprm-od-g-1345/" +
+      "%link%" +
       "\"" +
       " data-numposts=" +
       "\"" +
@@ -78,14 +84,4 @@ class ArticleInteractor {
       "utf-8" +
       "\"" +
       "></script>";
-// static getArticle(BuildContext context) async {
-//   final data =
-//       await DefaultAssetBundle.of(context).loadString('assets/article.json');
-//   var jsonResult = json.decode(data.toString());
-//   ArticleModel model = ArticleModel.fromJson(jsonResult);
-//   print("MODEL: " + model.title);
-//   print("PHOTO: " + model.photos.length.toString());
-//   print("PHOTO: " + model.category.toString());
-//   print("TAGS: " + model.tags.length.toString());
-// }
 }

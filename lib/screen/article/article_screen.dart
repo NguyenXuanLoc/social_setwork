@@ -1,16 +1,15 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:social_setwork/model/article_model.dart';
 import 'package:social_setwork/screen/article/article_interactor.dart';
 import 'package:social_setwork/screen/article/article_item.dart';
 import 'package:social_setwork/screen/article/tag_item.dart';
 import 'package:social_setwork/screen/twitter/twitter_screen.dart';
 import 'package:social_setwork/screen/webpage/webview_screen.dart';
+import 'package:social_setwork/utils/common_utils.dart';
 import 'package:social_setwork/utils/navigation_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -25,12 +24,22 @@ class _ArticlePageState extends State<ArticlePage> {
   ArticleInteractor intaractor;
   InAppWebViewController webContentDController;
   InAppWebViewController webSocialDController;
+  InAppWebViewController webCommentController;
   var controller = PageController(initialPage: 0);
 
   void onWebLoadContent(inAppWebViewController) {
     this.webContentDController = inAppWebViewController;
     inAppWebViewController.loadData(
         data: model.contentText, mimeType: "text/html", encoding: "UTF-8");
+  }
+
+  void onWebCreateFbComment(inAppWebViewController) {
+    this.webCommentController = inAppWebViewController;
+    webCommentController.loadData(
+        baseUrl: model.wwwUrl,
+        data: intaractor.getCommentFb(model.wwwUrl),
+        mimeType: "text/html",
+        encoding: "UTF-8");
   }
 
   @override
@@ -77,9 +86,10 @@ class _ArticlePageState extends State<ArticlePage> {
                 "22'C",
                 style: TextStyle(color: Colors.black26, fontSize: 18),
               ),
-              Image.asset(
-                'assets/fontsize_white_pressed.png',
-                color: Colors.black45,
+              Icon(
+                Icons.font_download,
+                color: Colors.black38,
+                size: 30,
               ),
               Icon(
                 Icons.camera_alt,
@@ -126,217 +136,281 @@ class _ArticlePageState extends State<ArticlePage> {
                       child: CircularProgressIndicator(),
                     ),
                   );
-                return Expanded(
-                    child: ListView(
-                  shrinkWrap: true,
+                return SingleChildScrollView(
+                    child: Column(
+                  mainAxisSize: MainAxisSize.max,
                   children: [
-                    Container(
-                      height: 200,
-                      child: Stack(
-                        children: [
-                          Image.network(
-                            model.photos[0].url.toString(),
-                            fit: BoxFit.fill,
-                            height: 200,
-                            width: MediaQuery.of(context).size.width,
-                            errorBuilder: (context, error, stackhere) {
-                              if (error != null && context != null) {
-                                return Image.asset(
-                                  "assets/logo_splashscreen.png",
-                                  height: 200,
-                                  width: MediaQuery.of(context).size.width,
-                                );
-                              }
-                              return null;
-                            },
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Expanded(
+                    ListView(
+                      physics: NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      children: [
+                        Container(
+                          height: 200,
+                          child: Stack(
+                            children: [
+                              Expanded(
                                   child: Center(
                                 child: CircularProgressIndicator(
                                   strokeWidth: 1,
                                   valueColor: new AlwaysStoppedAnimation<Color>(
                                       Colors.deepOrangeAccent),
                                 ),
-                              ));
+                              )),
+                              Image.network(
+                                model.photos[0].url.toString(),
+                                fit: BoxFit.fill,
+                                height: 200,
+                                width: MediaQuery.of(context).size.width,
+                                errorBuilder: (context, error, stackhere) {
+                                  if (error != null && context != null) {
+                                    return Image.asset(
+                                      "assets/logo_splashscreen.png",
+                                      height: 200,
+                                      width: MediaQuery.of(context).size.width,
+                                    );
+                                  }
+                                  return null;
+                                },
+                              ),
+                              Positioned(
+                                child: Column(
+                                  children: [
+                                    Spacer(),
+                                    Container(
+                                      padding:
+                                          EdgeInsets.only(left: 10, bottom: 10),
+                                      child: Container(
+                                        padding:
+                                            EdgeInsets.only(left: 5, right: 5),
+                                        color: Colors.deepOrangeAccent,
+                                        child: Text(
+                                          model.category.name,
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16),
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 15,
+                        ),
+                        Text(
+                          model.title,
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        Container(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                model.sourceText,
+                                style: TextStyle(color: Colors.black45),
+                              ),
+                              Text(
+                                model.dateText,
+                                style: TextStyle(color: Colors.black45),
+                              )
+                            ],
+                          ),
+                          padding:
+                              EdgeInsets.only(top: 10, left: 10, right: 10),
+                        ),
+                        Expanded(
+//                      height: 2500,
+                          child: InAppWebView(
+                            onWebViewCreated: onWebLoadContent,
+                            initialOptions: InAppWebViewGroupOptions(
+                              android: AndroidInAppWebViewOptions(
+                                useWideViewPort: false,
+                              ),
+                              ios: IOSInAppWebViewOptions(
+                                enableViewportScale: true,
+                              ),
+                              crossPlatform: InAppWebViewOptions(
+                                  debuggingEnabled: true,
+                                  javaScriptEnabled: true,
+                                  javaScriptCanOpenWindowsAutomatically: true),
+                            ),
+                            onLoadStart: (InAppWebViewController controller,
+                                String url) {
+                              if (url != "about:blank") {
+                                NavigationUtils.movePage(context, WebPage(url));
+                                webContentDController.stopLoading();
+                                Timer(Duration(milliseconds: 300), () {
+                                  onWebLoadContent(webContentDController);
+                                });
+                              }
+                            },
+                            onLoadStop: (InAppWebViewController controller,
+                                String url) async {
+                              double height = double.parse(
+                                  await webContentDController.evaluateJavascript(
+                                      source:
+                                          "document.documentElement.scrollHeight;"));
+                              print("TAG HEIGHT: $height");
                             },
                           ),
-                          Positioned(
-                            child: Column(
-                              children: [
-                                Spacer(),
-                                Container(
-                                  padding:
-                                      EdgeInsets.only(left: 10, bottom: 10),
-                                  child: Container(
-                                    padding: EdgeInsets.only(left: 5, right: 5),
-                                    color: Colors.deepOrangeAccent,
-                                    child: Text(
-                                      model.category.name,
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 16),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Text(
-                      model.title,
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    Container(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            model.sourceText,
-                            style: TextStyle(color: Colors.black45),
-                          ),
-                          Text(
-                            model.dateText,
-                            style: TextStyle(color: Colors.black45),
-                          )
-                        ],
-                      ),
-                      padding: EdgeInsets.only(top: 10, left: 10, right: 10),
-                    ),
-                    Container(
-                      height: 2500,
-                      child: InAppWebView(
-                        onWebViewCreated: onWebLoadContent,
-                        initialOptions: InAppWebViewGroupOptions(
-                          android: AndroidInAppWebViewOptions(
-                            useWideViewPort: false,
-                          ),
-                          ios: IOSInAppWebViewOptions(
-                            enableViewportScale: true,
-                          ),
-                          crossPlatform: InAppWebViewOptions(
-                              debuggingEnabled: true,
-                              javaScriptEnabled: true,
-                              javaScriptCanOpenWindowsAutomatically: true),
                         ),
-                        onLoadStart:
-                            (InAppWebViewController controller, String url) {
-                          if (url != "about:blank") {
-                            NavigationUtils.movePage(context, WebPage(url));
-                            webContentDController.stopLoading();
-                            Timer(Duration(milliseconds: 300), () {
-                              onWebLoadContent(webContentDController);
-                            });
-                          }
-                        },
-                        onLoadStop:
-                            (InAppWebViewController controller, String url) {
-                          webSocialDController.evaluateJavascript(
-                              source: 'document.body.scrollHeight');
-                        },
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.only(top: 10),
-                        child: InAppWebView(
-                          onWebViewCreated: onWebSocial,
-                          initialOptions: InAppWebViewGroupOptions(
-                            android: AndroidInAppWebViewOptions(
-                              useWideViewPort: false,
+                        Container(
+                            padding: EdgeInsets.only(top: 10),
+                            child: InAppWebView(
+                              onWebViewCreated: onWebSocial,
+                              initialOptions: InAppWebViewGroupOptions(
+                                android: AndroidInAppWebViewOptions(
+                                  useWideViewPort: false,
+                                ),
+                                ios: IOSInAppWebViewOptions(
+                                  enableViewportScale: true,
+                                ),
+                                crossPlatform: InAppWebViewOptions(
+                                    debuggingEnabled: true,
+                                    javaScriptEnabled: true,
+                                    javaScriptCanOpenWindowsAutomatically:
+                                        true),
+                              ),
+                              onLoadStart: (InAppWebViewController controller,
+                                  String url) {
+                                if (url != "about:blank") {
+                                  webSocialDController.stopLoading();
+                                  _launchURL(url);
+                                  Timer(Duration(milliseconds: 300), () {
+                                    webSocialDController.loadData(
+                                        data: intaractor
+                                            .getContentSosialNetWork(),
+                                        mimeType: "text/html",
+                                        encoding: "UTF-8");
+                                  });
+                                }
+                              },
                             ),
-                            ios: IOSInAppWebViewOptions(
-                              enableViewportScale: true,
-                            ),
-                            crossPlatform: InAppWebViewOptions(
-                                debuggingEnabled: true,
-                                javaScriptEnabled: true,
-                                javaScriptCanOpenWindowsAutomatically: true),
+                            height: 400),
+                        Container(
+                          padding: EdgeInsets.only(left: 10, right: 10),
+                          child: GridView.count(
+                            mainAxisSpacing: 5,
+                            childAspectRatio: 4.0,
+                            scrollDirection: Axis.vertical,
+                            physics: NeverScrollableScrollPhysics(),
+                            // to disable GridView's scrolling
+                            shrinkWrap: true,
+                            crossAxisCount: 2,
+                            children:
+                                model.tags.map((e) => ItemTag(e)).toList(),
                           ),
-                          onLoadStart:
-                              (InAppWebViewController controller, String url) {
-                            if (url != "about:blank") {
-                              webSocialDController.stopLoading();
-                              _launchURL(url);
-                              Timer(Duration(milliseconds: 300), () {
-                                webSocialDController.loadData(
-                                    data: intaractor.getContentSosialNetWork(),
-                                    mimeType: "text/html",
-                                    encoding: "UTF-8");
-                              });
-                            }
-                          },
                         ),
-                        height: 400),
-                    Container(
-                      padding: EdgeInsets.only(left: 10, right: 10),
-                      child: GridView.count(
-                        mainAxisSpacing: 5,
-                        childAspectRatio: 4.0,
-                        scrollDirection: Axis.vertical,
-                        physics: NeverScrollableScrollPhysics(),
-                        // to disable GridView's scrolling
-                        shrinkWrap: true,
-                        crossAxisCount: 2,
-                        children: model.tags.map((e) => ItemTag(e)).toList(),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Container(
-                      padding: EdgeInsets.only(left: 10),
-                      child: Text(
-                        "Zobacz takze",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Container(
-                      padding: EdgeInsets.only(left: 10, right: 10),
-                      height: 5,
-                      child: Container(
-                        color: Colors.grey[200],
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.only(left: 10, right: 10),
-                      child: GridView.count(
-                        mainAxisSpacing: 5,
-                        childAspectRatio: 4.0,
-                        scrollDirection: Axis.vertical,
-                        physics: NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        crossAxisCount: 1,
-                        children:
-                            model.related.map((e) => ArticleItem(e)).toList(),
-                      ),
-                    ),
-                    Container(
-                      child: Text(
-                        "Dodaj komentarz",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      padding: EdgeInsets.only(left: 10, right: 10),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Container(
-                      padding: EdgeInsets.only(left: 10, right: 10),
-                      height: 5,
-                      child: Container(
-                        color: Colors.grey[200],
-                      ),
-                    ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(left: 10),
+                          child: Text(
+                            "Zobacz takze",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(left: 10, right: 10),
+                          height: 5,
+                          child: Container(
+                            color: Colors.grey[200],
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(left: 10, right: 10),
+                          child: GridView.count(
+                            mainAxisSpacing: 5,
+                            childAspectRatio: 4.0,
+                            scrollDirection: Axis.vertical,
+                            physics: NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            crossAxisCount: 1,
+                            children: model.related
+                                .map((e) => ArticleItem(e))
+                                .toList(),
+                          ),
+                        ),
+                        Container(
+                          child: Text(
+                            "Dodaj komentarz",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          padding: EdgeInsets.only(left: 10, right: 10),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(left: 10, right: 10),
+                          height: 5,
+                          child: Container(
+                            color: Colors.grey[200],
+                          ),
+                        ),
+                        /*     Builder(builder: (_) {
+                      if (_isLoadCommentFb)
+                        return Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 1,
+                            valueColor: new AlwaysStoppedAnimation<Color>(
+                                Colors.deepOrangeAccent),
+                          ),
+                        );
+                      return Container();
+                    }),*/
+                        Container(
+                            padding: EdgeInsets.only(top: 10),
+                            child: InAppWebView(
+                              onWebViewCreated: onWebCreateFbComment,
+                              initialOptions: InAppWebViewGroupOptions(
+                                android: AndroidInAppWebViewOptions(
+                                  useWideViewPort: false,
+                                ),
+                                ios: IOSInAppWebViewOptions(
+                                  enableViewportScale: true,
+                                ),
+                                crossPlatform: InAppWebViewOptions(
+                                    debuggingEnabled: true,
+                                    javaScriptEnabled: true,
+                                    javaScriptCanOpenWindowsAutomatically:
+                                        true),
+                              ),
+                              onLoadStart: (InAppWebViewController controller,
+                                  String url) async {
+                                if (url.contains(
+                                    "https://m.facebook.com/login.php")) {
+                                  NavigationUtils.movePage(
+                                      context, WebPage(url));
+                                  onWebCreateFbComment(webCommentController);
+                                }
+                                CommonUtils.eventBus
+                                    .on<String>()
+                                    .listen((event) {
+//                              onWebCreateFbComment(webCommentController);
+                                });
+                              },
+                              onLoadStop: (InAppWebViewController controller,
+                                  String url) {
+                                /* setState(() {
+                              _isLoadCommentFb = false;
+                              _heightCommentFb = 1000;
+                            });*/
+                              },
+                            ),
+                            height: 1000)
+                      ],
+                    )
                   ],
                 ));
               },

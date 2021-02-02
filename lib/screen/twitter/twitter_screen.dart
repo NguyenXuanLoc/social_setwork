@@ -15,7 +15,7 @@ class TwitterScreen extends StatefulWidget {
 }
 
 class _TwitterPageState extends State<TwitterScreen> {
- static String data = "<blockquote class=" +
+  static String data = "<blockquote class=" +
       "\"" +
       "twitter-tweet" +
       "\"" +
@@ -141,8 +141,48 @@ class _TwitterPageState extends State<TwitterScreen> {
       "></div></body></html>";
   String text =
       "In order to get behavior for match_parent and wrap_content we need to use mainAxisSize property in Row/Column widget, the mainAxisSize property takes MainAxisSize enum having two values which is MainAxisSize.min which behaves as wrap_content and MainAxisSize.max which behaves as match_parent.";
+
+  String commentFb = "<!DOCTYPE html><html><head>    <meta name=" +
+      "\"" +
+      "viewport" +
+      "\"" +
+      " content=" +
+      "\"" +
+      "width=device-width, initial-scale=1.0" +
+      "\"" +
+      ">    <meta property=" +
+      "\"" +
+      "og:locale" +
+      "\"" +
+      " content=" +
+      "\"" +
+      "pl_PL" +
+      "\"" +
+      " /></head><body><div id=" +
+      "\"" +
+      "fb-root" +
+      "\"" +
+      "></div><script>(function(d, s, id) {  var js, fjs = d.getElementsByTagName(s)[0];  if (d.getElementById(id)) return;  js = d.createElement(s); js.id = id;  js.src = " +
+      "\"" +
+      "//connect.facebook.net/pl_PL/sdk.js#xfbml=1&version=v2.6" +
+      "\"" +
+      ";  fjs.parentNode.insertBefore(js, fjs);}(document, 'script', 'facebook-jssdk'));</script><div class=" +
+      "\"" +
+      "fb-comments" +
+      "\"" +
+      " data-href=" +
+      "\"" +
+      "https://www.polsatnews.pl/wiadomosc/2021-02-01/raport-co-naprawde-sprzedawal-handlarz-szczepionkami-wyniki-zaskoczyly-wszystkich/" +
+      "\"" +
+      " data-numposts=" +
+      "\"" +
+      "5" +
+      "\"" +
+      "></div></body></html>";
+
   InAppWebViewController inAppWebViewController;
   InAppWebViewController inAppWebViewController1;
+  InAppWebViewController inAppWebViewController2;
 
   void onWebCreate(inAppWebViewController) {
     this.inAppWebViewController = inAppWebViewController;
@@ -156,6 +196,16 @@ class _TwitterPageState extends State<TwitterScreen> {
         data: data1, mimeType: "text/html", encoding: "UTF-8");
   }
 
+  void onWebCreateFbComment(inAppWebViewController) {
+    this.inAppWebViewController2 = inAppWebViewController;
+    inAppWebViewController2.loadData(
+        baseUrl:
+            "https://www.polsatnews.pl/wiadomosc/2021-02-01/raport-co-naprawde-sprzedawal-handlarz-szczepionkami-wyniki-zaskoczyly-wszystkich/",
+        data: commentFb,
+        mimeType: "text/html",
+        encoding: "UTF-8");
+  }
+
   _launchURL(String url) async {
     if (await canLaunch(url)) {
       await launch(url);
@@ -167,6 +217,7 @@ class _TwitterPageState extends State<TwitterScreen> {
   @override
   void initState() {
     super.initState();
+//    print("TAGGG: " + ArticleInteractor.getCommentFb("aaaaaaaaaaaaaaaaa"));
     // ArticleInteractor.getArticle(context);
   }
 
@@ -242,6 +293,36 @@ class _TwitterPageState extends State<TwitterScreen> {
                               encoding: "UTF-8");
                         });
                       }
+                    },
+                  ),
+                  height: 800),
+              Container(
+                  child: InAppWebView(
+                    onWebViewCreated: onWebCreateFbComment,
+                    initialOptions: InAppWebViewGroupOptions(
+                      android: AndroidInAppWebViewOptions(
+                        useWideViewPort: false,
+                      ),
+                      ios: IOSInAppWebViewOptions(
+                        enableViewportScale: false,
+                      ),
+                      crossPlatform: InAppWebViewOptions(
+                          debuggingEnabled: true,
+                          javaScriptEnabled: true,
+                          javaScriptCanOpenWindowsAutomatically: true),
+                    ),
+                    onLoadStart:
+                        (InAppWebViewController controller, String url) {
+//                      if (url != "about:blank") {
+//                        inAppWebViewController2.stopLoading();
+//                        _launchURL(url);
+//                        Timer(Duration(milliseconds: 300), () {
+//                          inAppWebViewController2.loadData(
+//                              data: data1,
+//                              mimeType: "text/html",
+//                              encoding: "UTF-8");
+//                        });
+//                      }
                     },
                   ),
                   height: 800),
