@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:social_setwork/model/article_model.dart';
@@ -137,8 +139,10 @@ class _ArticlePageState extends State<ArticlePage> {
                     ),
                   );
                 return Expanded(
-                    child: ListView(
+                    child: Container(
+                        child: ListView(
                   shrinkWrap: true,
+                  scrollDirection: Axis.vertical,
                   children: [
                     Container(
                       height: 200,
@@ -200,6 +204,7 @@ class _ArticlePageState extends State<ArticlePage> {
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     Container(
+                      height: 30,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -216,7 +221,7 @@ class _ArticlePageState extends State<ArticlePage> {
                       padding: EdgeInsets.only(top: 10, left: 10, right: 10),
                     ),
                     Container(
-                      height: 2500,
+                      height: 2500 /*MediaQuery.of(context).size.height*/,
                       child: InAppWebView(
                         onWebViewCreated: onWebLoadContent,
                         initialOptions: InAppWebViewGroupOptions(
@@ -241,47 +246,48 @@ class _ArticlePageState extends State<ArticlePage> {
                             });
                           }
                         },
-                        onLoadStop: (InAppWebViewController controller,
-                            String url) async {
-                          double height = double.parse(
-                              await webContentDController.evaluateJavascript(
-                                  source:
-                                      "document.documentElement.scrollHeight;"));
-                          print("TAG HEIGHT: $height");
-                        },
+                        /* gestureRecognizers:
+                            <Factory<VerticalDragGestureRecognizer>>[
+                          new Factory<VerticalDragGestureRecognizer>(
+                            () => new VerticalDragGestureRecognizer(),
+                          ),
+                        ].toSet(),*/
                       ),
                     ),
                     Container(
+                        height: MediaQuery.of(context).size.height,
                         padding: EdgeInsets.only(top: 10),
-                        child: InAppWebView(
-                          onWebViewCreated: onWebSocial,
-                          initialOptions: InAppWebViewGroupOptions(
-                            android: AndroidInAppWebViewOptions(
-                              useWideViewPort: false,
+                        child: Expanded(
+                          child: InAppWebView(
+                            onWebViewCreated: onWebSocial,
+                            initialOptions: InAppWebViewGroupOptions(
+                              android: AndroidInAppWebViewOptions(
+                                useWideViewPort: false,
+                              ),
+                              ios: IOSInAppWebViewOptions(
+                                enableViewportScale: true,
+                              ),
+                              crossPlatform: InAppWebViewOptions(
+                                  debuggingEnabled: true,
+                                  javaScriptEnabled: true,
+                                  javaScriptCanOpenWindowsAutomatically: true),
                             ),
-                            ios: IOSInAppWebViewOptions(
-                              enableViewportScale: true,
-                            ),
-                            crossPlatform: InAppWebViewOptions(
-                                debuggingEnabled: true,
-                                javaScriptEnabled: true,
-                                javaScriptCanOpenWindowsAutomatically: true),
+                            onLoadStart: (InAppWebViewController controller,
+                                String url) {
+                              if (url != "about:blank") {
+                                webSocialDController.stopLoading();
+                                _launchURL(url);
+                                Timer(Duration(milliseconds: 300), () {
+                                  webSocialDController.loadData(
+                                      data:
+                                          intaractor.getContentSosialNetWork(),
+                                      mimeType: "text/html",
+                                      encoding: "UTF-8");
+                                });
+                              }
+                            },
                           ),
-                          onLoadStart:
-                              (InAppWebViewController controller, String url) {
-                            if (url != "about:blank") {
-                              webSocialDController.stopLoading();
-                              _launchURL(url);
-                              Timer(Duration(milliseconds: 300), () {
-                                webSocialDController.loadData(
-                                    data: intaractor.getContentSosialNetWork(),
-                                    mimeType: "text/html",
-                                    encoding: "UTF-8");
-                              });
-                            }
-                          },
-                        ),
-                        height: 400),
+                        )),
                     Container(
                       padding: EdgeInsets.only(left: 10, right: 10),
                       child: GridView.count(
@@ -347,17 +353,6 @@ class _ArticlePageState extends State<ArticlePage> {
                         color: Colors.grey[200],
                       ),
                     ),
-                    /*     Builder(builder: (_) {
-                      if (_isLoadCommentFb)
-                        return Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 1,
-                            valueColor: new AlwaysStoppedAnimation<Color>(
-                                Colors.deepOrangeAccent),
-                          ),
-                        );
-                      return Container();
-                    }),*/
                     Container(
                         padding: EdgeInsets.only(top: 10),
                         child: InAppWebView(
@@ -382,7 +377,7 @@ class _ArticlePageState extends State<ArticlePage> {
                               onWebCreateFbComment(webCommentController);
                             }
                             CommonUtils.eventBus.on<String>().listen((event) {
-//                              onWebCreateFbComment(webCommentController);
+                              onWebCreateFbComment(webCommentController);
                             });
                           },
                           onLoadStop:
@@ -393,9 +388,9 @@ class _ArticlePageState extends State<ArticlePage> {
                             });*/
                           },
                         ),
-                        height: 1000)
+                        height: MediaQuery.of(context).size.height)
                   ],
-                ));
+                )));
               },
             )
           ],
