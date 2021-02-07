@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
 class NavigationUtils {
-  static void movePage(BuildContext context, Widget page) {
+  static void movePage(BuildContext context, Widget page, [Function function]) {
     Navigator.of(context).push(PageRouteBuilder(
         transitionDuration: Duration(seconds: 1),
         transitionsBuilder: (BuildContext context, Animation<double> animation,
@@ -16,8 +16,11 @@ class NavigationUtils {
         },
         pageBuilder: (BuildContext context, Animation<double> animation,
             Animation<double> setAnimation) =>
-        page));
+        page)).then((value) {
+      print("BACKkkk");
+    });
   }
+
   static void movePageAndRemoveOldPage(BuildContext context, Widget page) {
     Navigator.of(context).pushReplacement(PageRouteBuilder(
         transitionDuration: Duration(seconds: 1),

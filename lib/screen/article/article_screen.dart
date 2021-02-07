@@ -1,16 +1,17 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:social_setwork/model/article_model.dart';
 import 'package:social_setwork/screen/article/article_interactor.dart';
 import 'package:social_setwork/screen/article/article_item.dart';
 import 'package:social_setwork/screen/article/tag_item.dart';
 import 'package:social_setwork/screen/twitter/twitter_screen.dart';
 import 'package:social_setwork/screen/webpage/webview_screen.dart';
+import 'package:social_setwork/utils/common_utils.dart';
 import 'package:social_setwork/utils/navigation_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -25,12 +26,22 @@ class _ArticlePageState extends State<ArticlePage> {
   ArticleInteractor intaractor;
   InAppWebViewController webContentDController;
   InAppWebViewController webSocialDController;
+  InAppWebViewController webCommentController;
   var controller = PageController(initialPage: 0);
 
   void onWebLoadContent(inAppWebViewController) {
     this.webContentDController = inAppWebViewController;
     inAppWebViewController.loadData(
         data: model.contentText, mimeType: "text/html", encoding: "UTF-8");
+  }
+
+  void onWebCreateFbComment(inAppWebViewController) {
+    this.webCommentController = inAppWebViewController;
+    webCommentController.loadData(
+        baseUrl: model.wwwUrl,
+        data: intaractor.getCommentFb(model.wwwUrl),
+        mimeType: "text/html",
+        encoding: "UTF-8");
   }
 
   @override
@@ -77,9 +88,10 @@ class _ArticlePageState extends State<ArticlePage> {
                 "22'C",
                 style: TextStyle(color: Colors.black26, fontSize: 18),
               ),
-              Image.asset(
-                'assets/fontsize_white_pressed.png',
-                color: Colors.black45,
+              Icon(
+                Icons.font_download,
+                color: Colors.black38,
+                size: 30,
               ),
               Icon(
                 Icons.camera_alt,
@@ -127,13 +139,23 @@ class _ArticlePageState extends State<ArticlePage> {
                     ),
                   );
                 return Expanded(
-                    child: ListView(
+                    child: Container(
+                        child: ListView(
                   shrinkWrap: true,
+                  scrollDirection: Axis.vertical,
                   children: [
                     Container(
                       height: 200,
                       child: Stack(
                         children: [
+                          Expanded(
+                              child: Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 1,
+                              valueColor: new AlwaysStoppedAnimation<Color>(
+                                  Colors.deepOrangeAccent),
+                            ),
+                          )),
                           Image.network(
                             model.photos[0].url.toString(),
                             fit: BoxFit.fill,
@@ -148,17 +170,6 @@ class _ArticlePageState extends State<ArticlePage> {
                                 );
                               }
                               return null;
-                            },
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Expanded(
-                                  child: Center(
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 1,
-                                  valueColor: new AlwaysStoppedAnimation<Color>(
-                                      Colors.deepOrangeAccent),
-                                ),
-                              ));
                             },
                           ),
                           Positioned(
@@ -180,7 +191,7 @@ class _ArticlePageState extends State<ArticlePage> {
                                 )
                               ],
                             ),
-                          )
+                          ),
                         ],
                       ),
                     ),
@@ -193,6 +204,7 @@ class _ArticlePageState extends State<ArticlePage> {
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     Container(
+                      height: 30,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -209,7 +221,7 @@ class _ArticlePageState extends State<ArticlePage> {
                       padding: EdgeInsets.only(top: 10, left: 10, right: 10),
                     ),
                     Container(
-                      height: 2500,
+                      height: 2500 /*MediaQuery.of(context).size.height*/,
                       child: InAppWebView(
                         onWebViewCreated: onWebLoadContent,
                         initialOptions: InAppWebViewGroupOptions(
@@ -234,44 +246,48 @@ class _ArticlePageState extends State<ArticlePage> {
                             });
                           }
                         },
-                        onLoadStop:
-                            (InAppWebViewController controller, String url) {
-                          webSocialDController.evaluateJavascript(
-                              source: 'document.body.scrollHeight');
-                        },
+                        /* gestureRecognizers:
+                            <Factory<VerticalDragGestureRecognizer>>[
+                          new Factory<VerticalDragGestureRecognizer>(
+                            () => new VerticalDragGestureRecognizer(),
+                          ),
+                        ].toSet(),*/
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.only(top: 10),
-                        child: InAppWebView(
-                          onWebViewCreated: onWebSocial,
-                          initialOptions: InAppWebViewGroupOptions(
-                            android: AndroidInAppWebViewOptions(
-                              useWideViewPort: false,
+                        height: MediaQuery.of(context).size.height,
+                        padding: EdgeInsets.only(top: 10),
+                        child: Expanded(
+                          child: InAppWebView(
+                            onWebViewCreated: onWebSocial,
+                            initialOptions: InAppWebViewGroupOptions(
+                              android: AndroidInAppWebViewOptions(
+                                useWideViewPort: false,
+                              ),
+                              ios: IOSInAppWebViewOptions(
+                                enableViewportScale: true,
+                              ),
+                              crossPlatform: InAppWebViewOptions(
+                                  debuggingEnabled: true,
+                                  javaScriptEnabled: true,
+                                  javaScriptCanOpenWindowsAutomatically: true),
                             ),
-                            ios: IOSInAppWebViewOptions(
-                              enableViewportScale: true,
-                            ),
-                            crossPlatform: InAppWebViewOptions(
-                                debuggingEnabled: true,
-                                javaScriptEnabled: true,
-                                javaScriptCanOpenWindowsAutomatically: true),
+                            onLoadStart: (InAppWebViewController controller,
+                                String url) {
+                              if (url != "about:blank") {
+                                webSocialDController.stopLoading();
+                                _launchURL(url);
+                                Timer(Duration(milliseconds: 300), () {
+                                  webSocialDController.loadData(
+                                      data:
+                                          intaractor.getContentSosialNetWork(),
+                                      mimeType: "text/html",
+                                      encoding: "UTF-8");
+                                });
+                              }
+                            },
                           ),
-                          onLoadStart:
-                              (InAppWebViewController controller, String url) {
-                            if (url != "about:blank") {
-                              webSocialDController.stopLoading();
-                              _launchURL(url);
-                              Timer(Duration(milliseconds: 300), () {
-                                webSocialDController.loadData(
-                                    data: intaractor.getContentSosialNetWork(),
-                                    mimeType: "text/html",
-                                    encoding: "UTF-8");
-                              });
-                            }
-                          },
-                        ),
-                        height: 400),
+                        )),
                     Container(
                       padding: EdgeInsets.only(left: 10, right: 10),
                       child: GridView.count(
@@ -337,8 +353,44 @@ class _ArticlePageState extends State<ArticlePage> {
                         color: Colors.grey[200],
                       ),
                     ),
+                    Container(
+                        padding: EdgeInsets.only(top: 10),
+                        child: InAppWebView(
+                          onWebViewCreated: onWebCreateFbComment,
+                          initialOptions: InAppWebViewGroupOptions(
+                            android: AndroidInAppWebViewOptions(
+                              useWideViewPort: false,
+                            ),
+                            ios: IOSInAppWebViewOptions(
+                              enableViewportScale: true,
+                            ),
+                            crossPlatform: InAppWebViewOptions(
+                                debuggingEnabled: true,
+                                javaScriptEnabled: true,
+                                javaScriptCanOpenWindowsAutomatically: true),
+                          ),
+                          onLoadStart: (InAppWebViewController controller,
+                              String url) async {
+                            if (url
+                                .contains("https://m.facebook.com/login.php")) {
+                              NavigationUtils.movePage(context, WebPage(url));
+                              onWebCreateFbComment(webCommentController);
+                            }
+                            CommonUtils.eventBus.on<String>().listen((event) {
+                              onWebCreateFbComment(webCommentController);
+                            });
+                          },
+                          onLoadStop:
+                              (InAppWebViewController controller, String url) {
+                            /* setState(() {
+                              _isLoadCommentFb = false;
+                              _heightCommentFb = 1000;
+                            });*/
+                          },
+                        ),
+                        height: MediaQuery.of(context).size.height)
                   ],
-                ));
+                )));
               },
             )
           ],
