@@ -19,6 +19,7 @@ class ArticleModel {
 
   final List<PhotoModel> photos;
   final String contentText;
+  final String test;
 
 //  final List<Object> videos;
   final List<TagModel> tags;
@@ -38,6 +39,7 @@ class ArticleModel {
       this.showMainVod,
       this.photos,
       this.contentText,
+      this.test,
       this.tags,
       this.related,
       this.skipVod,
@@ -56,6 +58,7 @@ class ArticleModel {
         ob['show_main_vod'],
         (ob['photos'] as List).map((e) => PhotoModel.fromJson(e)).toList(),
         ob['content_text'],
+        ob['test'],
 //        (ob['videos'] as List).map((e) => VIde),
         (ob['tags'] as List).map((e) => TagModel.fromJson(e)).toList(),
         (ob['related'] as List).map((e) => RelatedModel.fromJson(e)).toList(),

@@ -51,7 +51,7 @@ class _ArticlePageState extends State<ArticlePage> {
   void onWebSocial(inAppWebViewController) {
     this.webSocialDController = inAppWebViewController;
     inAppWebViewController.loadData(
-        data: intaractor.getContentSosialNetWork(),
+        data: model.test /*intaractor.getContentSosialNetWork()*/,
         mimeType: "text/html",
         encoding: "UTF-8");
   }
